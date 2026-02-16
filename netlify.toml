@@ -2,6 +2,9 @@
   command = "pnpm prisma generate && pnpm build"
   publish = "dist"
 
+[build.environment]
+  NODE_VERSION = "18"
+
 [functions]
   node_bundler = "esbuild"
   external_node_modules = ["@prisma/client"]
