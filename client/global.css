@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 250 250 252;
+    --foreground: 24 24 27;
+    --primary: 190 24 93;
+    --primary-foreground: 255 255 255;
+    --secondary: 243 232 255;
+    --accent: 168 85 247;
+    --muted: 244 244 245;
+    --card: 255 255 255;
+    --border: 228 228 231;
+    --ring: 190 24 93;
+  }
+
+  .dark {
+    --background: 24 24 27;
+    --foreground: 250 250 250;
+    --primary: 244 63 94;
+    --primary-foreground: 255 255 255;
+    --secondary: 88 28 135;
+    --accent: 192 132 252;
+    --muted: 39 39 42;
+    --card: 39 39 42;
+    --border: 63 63 70;
+    --ring: 244 63 94;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-zinc-200 dark:border-zinc-800;
+  }
+  body {
+    @apply bg-rose-50/30 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50 antialiased;
+  }
+}
+
+/* Glassmorphism utility */
+.glass {
+  @apply bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl border border-white/20 dark:border-zinc-700/50 shadow-glass;
+}
+
+/* Neumorphism */
+.neu {
+  @apply shadow-neu;
+}
+
+.neu-inset {
+  @apply shadow-neu-inset;
+}

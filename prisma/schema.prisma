@@ -1,0 +1,356 @@
+// Home Queen - Smart Family & Home Services Platform
+// Prisma Schema - Production Ready
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  WIFE
+  HUSBAND
+  KID
+  SERVICE_PROVIDER
+  COMPANY
+  ADMIN
+}
+
+enum ExpenseCategory {
+  FOOD
+  BILLS
+  EDUCATION
+  HEALTH
+  TRANSPORT
+  SHOPPING
+  ENTERTAINMENT
+  OTHER
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum ServiceCategory {
+  CLEANING
+  PLUMBING
+  ELECTRICAL
+  CARPENTRY
+  CAR_MECHANIC
+  BABYSITTER
+  DELIVERY
+  PRIVATE_TUTOR
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+// ============ AUTH & USERS ============
+
+model User {
+  id            String   @id @default(cuid())
+  email         String?  @unique
+  phone         String?  @unique
+  passwordHash  String?
+  name          String
+  avatar        String?
+  role          UserRole @default(WIFE)
+  isVerified    Boolean  @default(false)
+  familyId      String?
+  family        Family?  @relation(fields: [familyId], references: [id], onDelete: SetNull)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  tasks          Task[]
+  expenses       Expense[]
+  shoppingLists  ShoppingList[]
+  orders         Order[]
+  bookings       Booking[]
+  reviews        Review[]
+  notifications  Notification[]
+  posts          Post[]
+  comments       Comment[]
+  providerProfile Provider?
+  kidsProfiles   KidProfile[]
+}
+
+model Family {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members   User[]
+  expenses  Expense[]
+  tasks     Task[]
+  kids      KidProfile[]
+}
+
+// ============ HOUSE MANAGEMENT ============
+
+model Task {
+  id          String     @id @default(cuid())
+  title       String
+  description String?
+  status      TaskStatus @default(PENDING)
+  priority    Int        @default(0)
+  dueDate     DateTime?
+  completedAt DateTime?
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  familyId    String?
+  family      Family?    @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([userId])
+  @@index([familyId])
+  @@index([status])
+}
+
+// ============ FINANCIAL ============
+
+model Expense {
+  id          String          @id @default(cuid())
+  amount      Float
+  category    ExpenseCategory
+  description String?
+  date        DateTime        @default(now())
+  userId      String
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  familyId    String?
+  family      Family?         @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([userId])
+  @@index([familyId])
+  @@index([category])
+  @@index([date])
+}
+
+// ============ SHOPPING ============
+
+model ShoppingList {
+  id        String   @id @default(cuid())
+  name      String   @default("Main List")
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items     ShoppingItem[]
+}
+
+model ShoppingItem {
+  id             String       @id @default(cuid())
+  name           String
+  quantity       Int          @default(1)
+  unit           String?      @default("pcs")
+  isPurchased    Boolean      @default(false)
+  shoppingListId String
+  shoppingList   ShoppingList @relation(fields: [shoppingListId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([shoppingListId])
+}
+
+// ============ HOME SERVICES MARKETPLACE ============
+
+model Service {
+  id          String           @id @default(cuid())
+  name        String
+  description String?
+  category    ServiceCategory
+  basePrice   Float
+  imageUrl    String?
+  isActive    Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  providers   Provider[]
+}
+
+model Provider {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  serviceId     String
+  service       Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  bio           String?
+  rating        Float    @default(0)
+  reviewCount   Int      @default(0)
+  isApproved    Boolean  @default(false)
+  isAvailable   Boolean  @default(true)
+  locationLat   Float?
+  locationLng   Float?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  bookings      Booking[]
+  reviews       Review[]
+
+  @@index([serviceId])
+  @@index([isApproved])
+}
+
+model Booking {
+  id            String        @id @default(cuid())
+  providerId    String
+  provider      Provider      @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status        BookingStatus @default(PENDING)
+  scheduledAt   DateTime
+  address       String
+  latitude      Float?
+  longitude     Float?
+  notes         String?
+  price         Float?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  order         Order?
+  review        Review?
+
+  @@index([providerId])
+  @@index([userId])
+  @@index([status])
+}
+
+// ============ ORDERS & PAYMENTS ============
+
+model Order {
+  id            String        @id @default(cuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookingId     String?       @unique
+  booking       Booking?      @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  totalAmount   Float
+  status        PaymentStatus @default(PENDING)
+  paymentMethod String?
+  paymentId     String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([userId])
+}
+
+// ============ REVIEWS ============
+
+model Review {
+  id         String   @id @default(cuid())
+  rating     Int
+  comment    String?
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  providerId String
+  provider   Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  bookingId  String?  @unique
+  booking    Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([providerId])
+  @@index([userId])
+}
+
+// ============ NOTIFICATIONS ============
+
+model Notification {
+  id        String   @id @default(cuid())
+  title     String
+  message   String
+  type      String?
+  isRead    Boolean  @default(false)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+}
+
+// ============ KIDS & SCHOOL ============
+
+model KidProfile {
+  id          String   @id @default(cuid())
+  name        String
+  birthDate   DateTime?
+  parentId    String
+  parent      User     @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  familyId    String?
+  family      Family?  @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  schoolName  String?
+  grade       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  homework    Homework[]
+
+  @@index([parentId])
+}
+
+model Homework {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  dueDate     DateTime
+  isCompleted Boolean   @default(false)
+  kidId       String
+  kid         KidProfile @relation(fields: [kidId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([kidId])
+}
+
+// ============ COMMUNITY ============
+
+model Post {
+  id        String   @id @default(cuid())
+  title     String?
+  content   String
+  imageUrl  String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  comments  Comment[]
+
+  @@index([userId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([postId])
+}
