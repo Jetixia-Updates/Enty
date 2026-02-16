@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAuthHeaders } from "@/store/auth";
+import { API_BASE } from "@/lib/api";
 
 interface Task {
   id: string;
@@ -22,7 +23,7 @@ export default function Tasks() {
   const [adding, setAdding] = useState(false);
 
   async function load() {
-    const r = await fetch("/api/tasks", { headers: getAuthHeaders() });
+    const r = await fetch(`${API_BASE}/api/tasks`, { headers: getAuthHeaders() });
     const data = await r.json();
     setTasks(Array.isArray(data) ? data : []);
   }
@@ -36,7 +37,7 @@ export default function Tasks() {
     if (!newTitle.trim()) return;
     setAdding(true);
     try {
-      const r = await fetch("/api/tasks", {
+      const r = await fetch(`${API_BASE}/api/tasks`, {
         method: "POST",
         headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({ title: newTitle.trim() }),
@@ -52,7 +53,7 @@ export default function Tasks() {
 
   async function toggleStatus(task: Task) {
     const next = task.status === "COMPLETED" ? "PENDING" : "COMPLETED";
-    await fetch(`/api/tasks/${task.id}`, {
+    await fetch(`${API_BASE}/api/tasks/${task.id}`, {
       method: "PATCH",
       headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify({ status: next }),
@@ -61,7 +62,7 @@ export default function Tasks() {
   }
 
   async function deleteTask(id: string) {
-    await fetch(`/api/tasks/${id}`, { method: "DELETE", headers: getAuthHeaders() });
+    await fetch(`${API_BASE}/api/tasks/${id}`, { method: "DELETE", headers: getAuthHeaders() });
     await load();
   }
 

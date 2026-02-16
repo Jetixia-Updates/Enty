@@ -88,6 +88,11 @@ authRoutes.post("/login", async (req, res) => {
       return res.status(400).json({ error: e.errors[0].message });
     }
     console.error("Login error:", e);
-    res.status(500).json({ error: "Login failed" });
+    res
+      .status(500)
+      .json({
+        error: "Login failed",
+        ...(process.env.NODE_ENV !== "production" && { debug: String(e) }),
+      });
   }
 });

@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getAuthHeaders } from "@/store/auth";
+import { API_BASE } from "@/lib/api";
 
 interface ProviderData {
   id: string;
@@ -28,7 +29,7 @@ export default function ProviderDetail() {
 
   useEffect(() => {
     if (!id) return;
-    fetch(`/api/providers/${id}`, { headers: getAuthHeaders() })
+    fetch(`${API_BASE}/api/providers/${id}`, { headers: getAuthHeaders() })
       .then((r) => r.json())
       .then(setProvider)
       .finally(() => setLoading(false));
@@ -39,7 +40,7 @@ export default function ProviderDetail() {
     if (!provider || !booking.address || !booking.date || !booking.time) return;
     setSubmitting(true);
     const scheduledAt = new Date(`${booking.date}T${booking.time}`).toISOString();
-    const r = await fetch("/api/bookings", {
+    const r = await fetch(`${API_BASE}/api/bookings`, {
       method: "POST",
       headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify({

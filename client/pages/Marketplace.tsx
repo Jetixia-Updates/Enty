@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { getAuthHeaders } from "@/store/auth";
+import { API_BASE } from "@/lib/api";
 
 const CATEGORY_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   CLEANING: Sparkles,
@@ -42,11 +43,11 @@ export default function Marketplace() {
   const [filter, setFilter] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/services/categories").then((r) => r.json()).then(setCategories);
+    fetch(`${API_BASE}/api/services/categories`).then((r) => r.json()).then(setCategories);
   }, []);
 
   useEffect(() => {
-    const url = filter ? `/api/providers?category=${filter}` : "/api/providers";
+    const url = filter ? `${API_BASE}/api/providers?category=${filter}` : `${API_BASE}/api/providers`;
     fetch(url, { headers: getAuthHeaders() })
       .then((r) => r.json())
       .then((d) => setProviders(Array.isArray(d) ? d : []));

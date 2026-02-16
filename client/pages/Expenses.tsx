@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { getAuthHeaders } from "@/store/auth";
+import { API_BASE } from "@/lib/api";
 
 const CATEGORIES = [
   "FOOD",
@@ -32,8 +33,8 @@ export default function Expenses() {
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/expenses", { headers }).then((r) => r.json()),
-      fetch("/api/expenses/summary", { headers }).then((r) => r.json()),
+      fetch(`${API_BASE}/api/expenses`, { headers }).then((r) => r.json()),
+      fetch(`${API_BASE}/api/expenses/summary`, { headers }).then((r) => r.json()),
     ]).then(([e, s]) => {
       setExpenses(Array.isArray(e) ? e : []);
       setSummary(s?.total !== undefined ? s : null);
@@ -44,7 +45,7 @@ export default function Expenses() {
     e.preventDefault();
     const amount = parseFloat(form.amount);
     if (!amount || amount <= 0) return;
-    await fetch("/api/expenses", {
+    await fetch(`${API_BASE}/api/expenses`, {
       method: "POST",
       headers: { ...headers, "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -56,8 +57,8 @@ export default function Expenses() {
     setForm({ amount: "", category: "FOOD", description: "" });
     setShowForm(false);
     const [eRes, sRes] = await Promise.all([
-      fetch("/api/expenses", { headers }).then((r) => r.json()),
-      fetch("/api/expenses/summary", { headers }).then((r) => r.json()),
+      fetch(`${API_BASE}/api/expenses`, { headers }).then((r) => r.json()),
+      fetch(`${API_BASE}/api/expenses/summary`, { headers }).then((r) => r.json()),
     ]);
     setExpenses(Array.isArray(eRes) ? eRes : []);
     setSummary(sRes?.total !== undefined ? sRes : null);

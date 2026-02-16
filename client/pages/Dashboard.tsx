@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuthStore } from "@/store/auth";
 import { getAuthHeaders } from "@/store/auth";
+import { API_BASE } from "@/lib/api";
 
 interface Task { id: string; title: string; status: string; dueDate?: string }
 interface Summary { total: number; byCategory: Record<string, number> }
@@ -29,9 +30,9 @@ export default function Dashboard() {
   useEffect(() => {
     const headers = getAuthHeaders();
     Promise.all([
-      fetch("/api/tasks", { headers }).then((r) => r.json()),
-      fetch("/api/expenses/summary", { headers }).then((r) => r.json()),
-      fetch("/api/notifications", { headers }).then((r) => r.json()),
+      fetch(`${API_BASE}/api/tasks`, { headers }).then((r) => r.json()),
+      fetch(`${API_BASE}/api/expenses/summary`, { headers }).then((r) => r.json()),
+      fetch(`${API_BASE}/api/notifications`, { headers }).then((r) => r.json()),
     ]).then(([t, e, n]) => {
       setTasks(Array.isArray(t) ? t.filter((x: Task) => x.status !== "COMPLETED").slice(0, 5) : []);
       setExpenseSummary(e?.total !== undefined ? e : null);
