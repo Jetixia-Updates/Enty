@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import {
   LayoutDashboard,
@@ -9,47 +10,46 @@ import {
   Baby,
   Users,
   LogOut,
-  Bell,
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 import { Button } from "@/components/ui/button";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { cn } from "@/lib/utils";
 
-const navItems = [
-  { path: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { path: "/tasks", icon: CheckSquare, label: "Tasks" },
-  { path: "/expenses", icon: Wallet, label: "Expenses" },
-  { path: "/shopping", icon: ShoppingCart, label: "Shopping" },
-  { path: "/marketplace", icon: Store, label: "Services" },
-  { path: "/kids", icon: Baby, label: "Kids" },
-  { path: "/community", icon: Users, label: "Community" },
-];
+const navKeys = ["dashboard", "tasks", "expenses", "shopping", "services", "kids", "community"] as const;
+const navPaths = ["/dashboard", "/tasks", "/expenses", "/shopping", "/marketplace", "/kids", "/community"];
+const navIcons = [LayoutDashboard, CheckSquare, Wallet, ShoppingCart, Store, Baby, Users];
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
+  const { t } = useTranslation();
   const { user, logout } = useAuthStore();
+  const isRtl = document.documentElement.dir === "rtl";
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
-      {/* Sidebar */}
       <aside className="w-full lg:w-64 glass border-b lg:border-b-0 lg:border-r border-zinc-200/50 dark:border-zinc-800/50 p-4">
-        <Link to="/dashboard" className="flex items-center gap-2 mb-8 px-2">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-lavender-500 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-rose-500/30">
-            HQ
-          </div>
-          <span className="font-display font-bold text-xl text-zinc-800 dark:text-zinc-100">
-            Home Queen
-          </span>
-        </Link>
+        <div className="flex items-center justify-between mb-8 px-2">
+          <Link to="/dashboard" className="flex items-center gap-2">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-lavender-500 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-rose-500/30">
+              HQ
+            </div>
+            <span className="font-display font-bold text-xl text-zinc-800 dark:text-zinc-100">
+              {t("app.name")}
+            </span>
+          </Link>
+          <LanguageSwitcher />
+        </div>
 
         <nav className="space-y-1">
-          {navItems.map((item) => {
-            const isActive = location.pathname === item.path || (item.path !== "/dashboard" && location.pathname.startsWith(item.path));
-            const Icon = item.icon;
+          {navPaths.map((path, i) => {
+            const isActive = location.pathname === path || (path !== "/dashboard" && location.pathname.startsWith(path));
+            const Icon = navIcons[i];
+            const key = navKeys[i];
             return (
-              <Link key={item.path} to={item.path}>
+              <Link key={path} to={path}>
                 <motion.div
-                  whileHover={{ x: 4 }}
+                  whileHover={{ x: isRtl ? -4 : 4 }}
                   whileTap={{ scale: 0.98 }}
                   className={cn(
                     "flex items-center gap-3 px-4 py-3 rounded-xl transition-colors",
@@ -59,7 +59,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   )}
                 >
                   <Icon className="w-5 h-5" />
-                  <span className="font-medium">{item.label}</span>
+                  <span className="font-medium">{t(`nav.${key}`)}</span>
                 </motion.div>
               </Link>
             );
@@ -73,7 +73,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
           <Button variant="ghost" className="w-full justify-start" onClick={logout}>
             <LogOut className="w-4 h-4" />
-            Logout
+            {t("nav.logout")}
           </Button>
         </div>
       </aside>

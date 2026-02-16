@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import {
   CheckSquare,
@@ -22,10 +23,12 @@ interface Task { id: string; title: string; status: string; dueDate?: string }
 interface Summary { total: number; byCategory: Record<string, number> }
 
 export default function Dashboard() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [expenseSummary, setExpenseSummary] = useState<Summary | null>(null);
   const [notifications, setNotifications] = useState<{ id: string; title: string; isRead: boolean }[]>([]);
+  const [kidsCount, setKidsCount] = useState<number>(0);
 
   useEffect(() => {
     const headers = getAuthHeaders();
@@ -33,10 +36,12 @@ export default function Dashboard() {
       fetch(`${API_BASE}/api/tasks`, { headers }).then((r) => r.json()),
       fetch(`${API_BASE}/api/expenses/summary`, { headers }).then((r) => r.json()),
       fetch(`${API_BASE}/api/notifications`, { headers }).then((r) => r.json()),
-    ]).then(([t, e, n]) => {
+      fetch(`${API_BASE}/api/kids/profiles`, { headers }).then((r) => r.json()),
+    ]).then(([t, e, n, k]) => {
       setTasks(Array.isArray(t) ? t.filter((x: Task) => x.status !== "COMPLETED").slice(0, 5) : []);
       setExpenseSummary(e?.total !== undefined ? e : null);
       setNotifications(Array.isArray(n) ? n.slice(0, 5) : []);
+      setKidsCount(Array.isArray(k) ? k.length : 0);
     });
   }, []);
 
@@ -51,19 +56,17 @@ export default function Dashboard() {
     >
       <div>
         <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
-          Hello, {user?.name?.split(" ")[0] || "there"} 👋
+          {t("dashboard.hello")}, {user?.name?.split(" ")[0] || t("common.there")} 👋
         </h1>
-        <p className="text-zinc-600 dark:text-zinc-400 mt-1">
-          Here&apos;s what&apos;s happening with your home today
-        </p>
+        <p className="text-zinc-600 dark:text-zinc-400 mt-1">{t("dashboard.todayOverview")}</p>
       </div>
 
       <motion.div variants={container} initial="hidden" animate="show" className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {[
-          { path: "/tasks", icon: CheckSquare, label: "Today's Tasks", value: String(tasks.length), colorClass: "bg-rose-100 dark:bg-rose-950/50 text-rose-600" },
-          { path: "/expenses", icon: Wallet, label: "Monthly Spend", value: expenseSummary ? `EGP ${expenseSummary.total.toLocaleString()}` : "—", colorClass: "bg-lavender-100 dark:bg-lavender-950/50 text-lavender-600" },
-          { path: "/kids", icon: Baby, label: "Kids", value: "—", colorClass: "bg-gold-100 dark:bg-gold-900/30 text-gold-600" },
-          { path: "/marketplace", icon: Store, label: "Book Service", value: "View", colorClass: "bg-rose-100 dark:bg-rose-950/50 text-rose-600" },
+          { path: "/tasks", icon: CheckSquare, labelKey: "todayTasks", value: String(tasks.length), colorClass: "bg-rose-100 dark:bg-rose-950/50 text-rose-600" },
+          { path: "/expenses", icon: Wallet, labelKey: "monthlySpend", value: expenseSummary ? `EGP ${expenseSummary.total.toLocaleString()}` : "—", colorClass: "bg-lavender-100 dark:bg-lavender-950/50 text-lavender-600" },
+          { path: "/kids", icon: Baby, labelKey: "kidsLabel", value: String(kidsCount), colorClass: "bg-gold-100 dark:bg-gold-900/30 text-gold-600" },
+          { path: "/marketplace", icon: Store, labelKey: "bookService", value: t("dashboard.view"), colorClass: "bg-rose-100 dark:bg-rose-950/50 text-rose-600" },
         ].map((b) => {
           const Icon = b.icon;
           return (
@@ -72,7 +75,7 @@ export default function Dashboard() {
                 <Card className="glass hover:shadow-xl transition-shadow overflow-hidden group cursor-pointer">
                   <CardContent className="p-6 flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-zinc-500">{b.label}</p>
+                      <p className="text-sm text-zinc-500">{t(`dashboard.${b.labelKey}`)}</p>
                       <p className="text-2xl font-bold mt-1">{b.value}</p>
                     </div>
                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform ${b.colorClass}`}>
@@ -92,17 +95,17 @@ export default function Dashboard() {
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 <CheckSquare className="w-5 h-5" />
-                Today&apos;s Tasks
+                {t("dashboard.todayTasks")}
               </CardTitle>
               <Button size="sm" variant="ghost" asChild>
                 <Link to="/tasks">
-                  <Plus className="w-4 h-4 mr-1" /> Add
+                  <Plus className="w-4 h-4 mr-1 rtl:ml-1 rtl:mr-0" /> {t("dashboard.add")}
                 </Link>
               </Button>
             </CardHeader>
             <CardContent>
               {tasks.length === 0 ? (
-                <p className="text-zinc-500 text-center py-8">No pending tasks. Add one!</p>
+                <p className="text-zinc-500 text-center py-8">{t("dashboard.noTasks")}</p>
               ) : (
                 <ul className="space-y-3">
                   {tasks.map((t) => (
@@ -118,7 +121,7 @@ export default function Dashboard() {
               )}
               <Button variant="ghost" className="w-full mt-4" asChild>
                 <Link to="/tasks">
-                  View all <ArrowRight className="w-4 h-4 ml-1" />
+                  {t("dashboard.viewAll")} <ArrowRight className="w-4 h-4 ml-1 rtl:mr-1 rtl:ml-0 rtl:rotate-180" />
                 </Link>
               </Button>
             </CardContent>
@@ -130,12 +133,12 @@ export default function Dashboard() {
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 <Bell className="w-5 h-5" />
-                Notifications
+                {t("dashboard.notifications")}
               </CardTitle>
             </CardHeader>
             <CardContent>
               {notifications.length === 0 ? (
-                <p className="text-zinc-500 text-center py-8">No new notifications</p>
+                <p className="text-zinc-500 text-center py-8">{t("dashboard.noNotifications")}</p>
               ) : (
                 <ul className="space-y-2">
                   {notifications.map((n) => (
@@ -161,19 +164,21 @@ export default function Dashboard() {
                 <Sparkles className="w-7 h-7 text-rose-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-lg">Need help fast?</h3>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">Book a service or call emergency</p>
+                <h3 className="font-semibold text-lg">{t("dashboard.needHelp")}</h3>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">{t("dashboard.needHelpDesc")}</p>
               </div>
             </div>
             <div className="flex gap-3">
               <Button asChild>
                 <Link to="/marketplace">
-                  <Store className="w-4 h-4 mr-2" /> Book Service
+                  <Store className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" /> {t("dashboard.bookServiceBtn")}
                 </Link>
               </Button>
-              <Button variant="outline">
-                <Phone className="w-4 h-4 mr-2" /> Emergency
-              </Button>
+              <a href="tel:123">
+                <Button variant="outline" type="button">
+                  <Phone className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" /> {t("dashboard.emergency")}
+                </Button>
+              </a>
             </div>
           </CardContent>
         </Card>

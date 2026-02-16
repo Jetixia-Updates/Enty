@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Trash2, Check, Circle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ interface Task {
 }
 
 export default function Tasks() {
+  const { t } = useTranslation();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [newTitle, setNewTitle] = useState("");
@@ -72,41 +74,41 @@ export default function Tasks() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">Tasks</h1>
-        <p className="text-zinc-600 dark:text-zinc-400 mt-1">Manage your household tasks</p>
+        <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">{t("tasks.title")}</h1>
+        <p className="text-zinc-600 dark:text-zinc-400 mt-1">{t("tasks.subtitle")}</p>
       </div>
 
       <Card className="glass">
         <CardHeader>
-          <CardTitle>Add task</CardTitle>
+          <CardTitle>{t("tasks.addTask")}</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={addTask} className="flex gap-2">
             <Input
-              placeholder="What needs to be done?"
+              placeholder={t("tasks.placeholder")}
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
               className="flex-1"
             />
             <Button type="submit" disabled={adding || !newTitle.trim()}>
-              <Plus className="w-4 h-4 mr-2" /> Add
+              <Plus className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" /> {t("dashboard.add")}
             </Button>
           </form>
         </CardContent>
       </Card>
 
       {loading ? (
-        <p className="text-zinc-500">Loading...</p>
+        <p className="text-zinc-500">{t("common.loading")}</p>
       ) : (
         <>
           <Card className="glass">
             <CardHeader>
-              <CardTitle>Pending</CardTitle>
+              <CardTitle>{t("tasks.pending")}</CardTitle>
             </CardHeader>
             <CardContent>
               <AnimatePresence mode="popLayout">
                 {pending.length === 0 ? (
-                  <p className="text-zinc-500 py-4">No pending tasks</p>
+                  <p className="text-zinc-500 py-4">{t("tasks.noPending")}</p>
                 ) : (
                   <ul className="space-y-2">
                     {pending.map((t) => (
@@ -136,7 +138,7 @@ export default function Tasks() {
           {completed.length > 0 && (
             <Card className="glass">
               <CardHeader>
-                <CardTitle>Completed</CardTitle>
+                <CardTitle>{t("tasks.completed")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">

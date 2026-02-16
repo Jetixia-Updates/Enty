@@ -99,7 +99,7 @@ async function main() {
     },
   });
 
-  // Create sample tasks
+  // Create sample tasks (English - UI language is switched separately)
   await prisma.task.createMany({
     data: [
       { title: "Morning cleaning", userId: wife.id, familyId: family.id, status: "PENDING" },
@@ -114,6 +114,29 @@ async function main() {
       { amount: 500, category: "FOOD", description: "Groceries", userId: wife.id, familyId: family.id },
       { amount: 350, category: "BILLS", description: "Electricity", userId: wife.id, familyId: family.id },
       { amount: 200, category: "EDUCATION", description: "School supplies", userId: wife.id, familyId: family.id },
+    ],
+  });
+
+  // Create sample kid profile & homework
+  const kid = await prisma.kidProfile.create({
+    data: {
+      name: "Omar",
+      birthDate: new Date("2015-05-20"),
+      schoolName: "Sunrise School",
+      grade: "Grade 4",
+      parentId: wife.id,
+      familyId: family.id,
+    },
+  });
+  const nextWeek = new Date();
+  nextWeek.setDate(nextWeek.getDate() + 3);
+  const inTwoWeeks = new Date();
+  inTwoWeeks.setDate(inTwoWeeks.getDate() + 10);
+  await prisma.homework.createMany({
+    data: [
+      { title: "Math worksheet", description: "Complete pages 12-15", dueDate: nextWeek, kidId: kid.id },
+      { title: "Science project", description: "Plant growth experiment", dueDate: inTwoWeeks, kidId: kid.id },
+      { title: "Reading assignment", dueDate: new Date(), kidId: kid.id, isCompleted: true },
     ],
   });
 

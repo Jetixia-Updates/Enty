@@ -12,7 +12,9 @@ import { bookingsRoutes } from "./routes/bookings.js";
 import { ordersRoutes } from "./routes/orders.js";
 import { tasksRoutes } from "./routes/tasks.js";
 import { expensesRoutes } from "./routes/expenses.js";
+import { shoppingRoutes } from "./routes/shopping.js";
 import { notificationsRoutes } from "./routes/notifications.js";
+import { kidsRoutes } from "./routes/kids.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -32,7 +34,9 @@ export function createServer() {
   app.use("/api/orders", ordersRoutes);
   app.use("/api/tasks", tasksRoutes);
   app.use("/api/expenses", expensesRoutes);
+  app.use("/api/shopping", shoppingRoutes);
   app.use("/api/notifications", notificationsRoutes);
+  app.use("/api/kids", kidsRoutes);
 
   // Health check
   app.get("/api/ping", (_req, res) => res.json({ status: "ok", ts: Date.now() }));

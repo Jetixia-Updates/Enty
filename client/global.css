@@ -52,3 +52,17 @@
 .neu-inset {
   @apply shadow-neu-inset;
 }
+
+/* RTL Support & Arabic font */
+[dir="rtl"] {
+  text-align: right;
+  font-family: "Cairo", "Tajawal", system-ui, sans-serif;
+}
+
+[dir="rtl"] .text-left {
+  text-align: right;
+}
+
+[dir="rtl"] .text-right {
+  text-align: left;
+}

@@ -3,3 +3,6 @@ dist
 .env
 *.db
 prisma/dev.db
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts

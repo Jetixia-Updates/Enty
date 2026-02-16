@@ -21,6 +21,6 @@
       "@shared/*": ["shared/*"]
     }
   },
-  "include": ["client", "server", "shared", "prisma", "vite.config.ts"],
+  "include": ["client", "server", "shared", "prisma", "vite.config.ts", "client/vite-env.d.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

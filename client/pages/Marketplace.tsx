@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import {
   Sparkles,
@@ -38,6 +39,7 @@ interface Provider {
 }
 
 export default function Marketplace() {
+  const { t } = useTranslation();
   const [providers, setProviders] = useState<Provider[]>([]);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [filter, setFilter] = useState<string | null>(null);
@@ -56,8 +58,8 @@ export default function Marketplace() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">Home Services</h1>
-        <p className="text-zinc-600 dark:text-zinc-400 mt-1">Book cleaning, plumbing, babysitter & more</p>
+        <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">{t("marketplace.title")}</h1>
+        <p className="text-zinc-600 dark:text-zinc-400 mt-1">{t("marketplace.subtitle")}</p>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -69,10 +71,11 @@ export default function Marketplace() {
               : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 hover:bg-zinc-200 dark:hover:bg-zinc-700"
           }`}
         >
-          All
+          {t("marketplace.all")}
         </button>
         {categories.map((c) => {
           const Icon = CATEGORY_ICONS[c.id] || Sparkles;
+          const label = t(`marketplace.${c.id.toLowerCase()}`);
           return (
             <button
               key={c.id}
@@ -84,7 +87,7 @@ export default function Marketplace() {
               }`}
             >
               <Icon className="w-4 h-4" />
-              {c.name}
+              {label}
             </button>
           );
         })}
@@ -114,10 +117,10 @@ export default function Marketplace() {
                     <div className="flex items-center gap-2 mt-3">
                       <Star className="w-4 h-4 fill-gold-400 text-gold-400" />
                       <span className="text-sm font-medium">{p.rating.toFixed(1)}</span>
-                      <span className="text-xs text-zinc-500">({p.reviewCount} reviews)</span>
+                      <span className="text-xs text-zinc-500">({t("marketplace.reviewsCount", { count: p.reviewCount })})</span>
                     </div>
                     <p className="text-rose-600 font-semibold mt-2">
-                      From EGP {p.service.basePrice}/session
+                      {t("marketplace.from")} EGP {p.service.basePrice}{t("marketplace.perSession")}
                     </p>
                   </CardContent>
                 </Card>
@@ -130,7 +133,7 @@ export default function Marketplace() {
       {providers.length === 0 && (
         <Card className="glass">
           <CardContent className="p-12 text-center">
-            <p className="text-zinc-500">No providers found. Check back later!</p>
+            <p className="text-zinc-500">{t("marketplace.noProviders")}</p>
           </CardContent>
         </Card>
       )}

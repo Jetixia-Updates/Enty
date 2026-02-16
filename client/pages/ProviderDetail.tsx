@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
-import { Star, MapPin, ArrowLeft, Calendar } from "lucide-react";
+import { Star, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,7 @@ interface ProviderData {
 }
 
 export default function ProviderDetail() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const [provider, setProvider] = useState<ProviderData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -53,19 +55,18 @@ export default function ProviderDetail() {
     });
     setSubmitting(false);
     if (r.ok) {
-      const data = await r.json();
-      alert("Booking confirmed! Check your bookings.");
+      alert(t("provider.bookingConfirmed"));
       setBooking({ address: "", date: "", time: "", notes: "" });
     } else {
       const err = await r.json();
-      alert(err.error || "Booking failed");
+      alert(err.error || t("provider.bookingFailed"));
     }
   }
 
   if (loading || !provider) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <p className="text-zinc-500">Loading...</p>
+        <p className="text-zinc-500">{t("common.loading")}</p>
       </div>
     );
   }
@@ -73,7 +74,7 @@ export default function ProviderDetail() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
       <Link to="/marketplace" className="inline-flex items-center gap-2 text-zinc-600 hover:text-rose-600">
-        <ArrowLeft className="w-4 h-4" /> Back to Services
+        <ArrowLeft className="w-4 h-4 rtl:rotate-180" /> {t("provider.backToServices")}
       </Link>
 
       <div className="grid lg:grid-cols-3 gap-8">
@@ -90,13 +91,13 @@ export default function ProviderDetail() {
                   <div className="flex items-center gap-2 mt-1">
                     <Star className="w-4 h-4 fill-gold-400 text-gold-400" />
                     <span className="font-medium">{provider.rating.toFixed(1)}</span>
-                    <span className="text-sm text-zinc-500">({provider.reviewCount} reviews)</span>
+                    <span className="text-sm text-zinc-500">({t("marketplace.reviewsCount", { count: provider.reviewCount })})</span>
                   </div>
                 </div>
               </div>
               {provider.bio && <p className="text-zinc-600 dark:text-zinc-400">{provider.bio}</p>}
               <p className="text-xl font-semibold text-rose-600 mt-4">
-                EGP {provider.service.basePrice} / session
+                EGP {provider.service.basePrice} / {t("provider.session")}
               </p>
             </CardContent>
           </Card>
@@ -104,7 +105,7 @@ export default function ProviderDetail() {
           {provider.reviews?.length > 0 && (
             <Card className="glass">
               <CardHeader>
-                <CardTitle>Reviews</CardTitle>
+                <CardTitle>{t("provider.reviews")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-4">
@@ -133,14 +134,14 @@ export default function ProviderDetail() {
         <div>
           <Card className="glass sticky top-6">
             <CardHeader>
-              <CardTitle>Book now</CardTitle>
+              <CardTitle>{t("provider.bookNow")}</CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleBook} className="space-y-4">
                 <div>
-                  <Label>Address</Label>
+                  <Label>{t("provider.address")}</Label>
                   <Input
-                    placeholder="Your address"
+                    placeholder={t("provider.addressPlaceholder")}
                     value={booking.address}
                     onChange={(e) => setBooking((b) => ({ ...b, address: e.target.value }))}
                     required
@@ -149,7 +150,7 @@ export default function ProviderDetail() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label>Date</Label>
+                    <Label>{t("provider.date")}</Label>
                     <Input
                       type="date"
                       value={booking.date}
@@ -159,7 +160,7 @@ export default function ProviderDetail() {
                     />
                   </div>
                   <div>
-                    <Label>Time</Label>
+                    <Label>{t("provider.time")}</Label>
                     <Input
                       type="time"
                       value={booking.time}
@@ -170,16 +171,16 @@ export default function ProviderDetail() {
                   </div>
                 </div>
                 <div>
-                  <Label>Notes (optional)</Label>
+                  <Label>{t("provider.notes")}</Label>
                   <textarea
-                    placeholder="Special requests..."
+                    placeholder={t("provider.notesPlaceholder")}
                     value={booking.notes}
                     onChange={(e) => setBooking((b) => ({ ...b, notes: e.target.value }))}
                     className="mt-2 flex w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2 text-sm min-h-[80px]"
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={submitting || !provider.isAvailable}>
-                  {submitting ? "Booking..." : `Book for EGP ${provider.service.basePrice}`}
+                  {submitting ? t("provider.booking") : `${t("provider.bookFor")} EGP ${provider.service.basePrice}`}
                 </Button>
               </form>
             </CardContent>

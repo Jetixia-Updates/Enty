@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { useAuthStore } from "@/store/auth";
 import { API_BASE } from "@/lib/api";
@@ -7,8 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export default function Login() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -48,16 +51,19 @@ export default function Login() {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        <Card className="glass border-white/50">
+        <Card className="glass border-white/50 relative">
+          <div className="absolute top-4 end-4">
+            <LanguageSwitcher />
+          </div>
           <CardHeader className="text-center">
             <Link to="/" className="inline-flex items-center gap-2 justify-center mb-4">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-lavender-500 flex items-center justify-center text-white font-bold text-lg">
                 HQ
               </div>
-              <span className="font-bold text-xl">Home Queen</span>
+              <span className="font-bold text-xl">{t("app.name")}</span>
             </Link>
-            <CardTitle className="text-2xl">Welcome back</CardTitle>
-            <CardDescription>Sign in to your account</CardDescription>
+            <CardTitle className="text-2xl">{t("auth.welcomeBack")}</CardTitle>
+            <CardDescription>{t("auth.signIn")}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -67,7 +73,7 @@ export default function Login() {
                 </div>
               )}
               <div>
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t("auth.email")}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -79,7 +85,7 @@ export default function Login() {
                 />
               </div>
               <div>
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t("auth.password")}</Label>
                 <Input
                   id="password"
                   type="password"
@@ -91,12 +97,12 @@ export default function Login() {
                 />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Signing in..." : "Sign in"}
+                {loading ? t("auth.signingIn") : t("auth.signInBtn")}
               </Button>
               <p className="text-center text-sm text-zinc-500">
-                Don&apos;t have an account?{" "}
+                {t("auth.noAccount")}{" "}
                 <Link to="/signup" className="text-rose-600 hover:underline font-medium">
-                  Sign up
+                  {t("auth.signUpBtn")}
                 </Link>
               </p>
             </form>
