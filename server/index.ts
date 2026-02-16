@@ -24,10 +24,11 @@ export function createApiApp() {
   app.use(cors({ origin: true, credentials: true }));
   app.use(express.json());
 
-  // Rewrite Netlify path /.netlify/functions/server/xyz → /api/xyz
+  // Netlify: basePath strips /.netlify/functions/server, so path is /auth/register → /api/auth/register
   app.use((req, _res, next) => {
-    const m = req.path.match(/^\/\.netlify\/functions\/server\/?(.*)$/);
-    if (m) req.url = "/api/" + (m[1] || "");
+    if (!req.path.startsWith("/api/")) {
+      req.url = "/api" + (req.path.startsWith("/") ? req.path : "/" + req.path);
+    }
     next();
   });
 
