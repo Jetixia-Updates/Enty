@@ -45,6 +45,16 @@ export function createApiApp() {
   app.use("/api/notifications", notificationsRoutes);
   app.use("/api/kids", kidsRoutes);
   app.get("/api/ping", (_req, res) => res.json({ status: "ok", ts: Date.now() }));
+  app.get("/api/health", async (_req, res) => {
+    try {
+      const { prisma } = await import("./lib/prisma.js");
+      await prisma.$queryRaw`SELECT 1`;
+      res.json({ ok: true, db: "connected" });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      res.status(500).json({ ok: false, db: "error", error: msg });
+    }
+  });
 
   return app;
 }

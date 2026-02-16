@@ -55,7 +55,16 @@ authRoutes.post("/register", async (req, res) => {
       return res.status(400).json({ error: e.errors[0].message });
     }
     console.error("Register error:", e);
-    res.status(500).json({ error: "Registration failed" });
+    const msg = e instanceof Error ? e.message : String(e);
+    const hint =
+      !process.env.DATABASE_URL
+        ? "DATABASE_URL not set in Netlify env"
+        : msg.includes("connect") || msg.includes("ECONNREFUSED")
+          ? "Database unreachable - check DATABASE_URL"
+          : msg.includes("JWT") || msg.includes("secret")
+            ? "JWT_SECRET not set in Netlify env"
+            : undefined;
+    res.status(500).json({ error: "Registration failed", hint });
   }
 });
 
@@ -88,11 +97,15 @@ authRoutes.post("/login", async (req, res) => {
       return res.status(400).json({ error: e.errors[0].message });
     }
     console.error("Login error:", e);
-    res
-      .status(500)
-      .json({
-        error: "Login failed",
-        ...(process.env.NODE_ENV !== "production" && { debug: String(e) }),
-      });
+    const msg = e instanceof Error ? e.message : String(e);
+    const hint =
+      !process.env.DATABASE_URL
+        ? "DATABASE_URL not set in Netlify env"
+        : msg.includes("connect") || msg.includes("ECONNREFUSED")
+          ? "Database unreachable - check DATABASE_URL"
+          : msg.includes("JWT") || msg.includes("secret")
+            ? "JWT_SECRET not set in Netlify env"
+            : undefined;
+    res.status(500).json({ error: "Login failed", hint });
   }
 });
