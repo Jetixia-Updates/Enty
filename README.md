@@ -91,6 +91,17 @@ pnpm dev
 
 ## Deployment
 
+### Netlify (full-stack – frontend + API)
+
+1. Connect the GitHub repo to [Netlify](https://app.netlify.com)
+2. Build command: `pnpm prisma generate && pnpm build` (or leave default from netlify.toml)
+3. Environment variables (Site settings → Environment variables):
+   - `DATABASE_URL` – PostgreSQL connection string (e.g. Neon, Supabase)
+   - `JWT_SECRET` – secret for JWT signing
+4. Deploy. The API runs as a serverless function at `/api/*`
+
+### Alternative
+
 - **Frontend**: Vercel, Netlify (static build)
 - **Backend**: Railway, Render (Node)
 - **Database**: Supabase PostgreSQL

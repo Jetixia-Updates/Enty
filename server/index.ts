@@ -18,13 +18,19 @@ import { kidsRoutes } from "./routes/kids.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export function createServer() {
+/** API-only app for Netlify serverless (no static files) */
+export function createApiApp() {
   const app = express();
-
   app.use(cors({ origin: true, credentials: true }));
   app.use(express.json());
 
-  // API Routes
+  // Rewrite Netlify path /.netlify/functions/server/xyz → /api/xyz
+  app.use((req, _res, next) => {
+    const m = req.path.match(/^\/\.netlify\/functions\/server\/?(.*)$/);
+    if (m) req.url = "/api/" + (m[1] || "");
+    next();
+  });
+
   app.use("/api/auth", authRoutes);
   app.use("/api/users", userRoutes);
   app.use("/api/family", familyRoutes);
@@ -37,25 +43,29 @@ export function createServer() {
   app.use("/api/shopping", shoppingRoutes);
   app.use("/api/notifications", notificationsRoutes);
   app.use("/api/kids", kidsRoutes);
-
-  // Health check
   app.get("/api/ping", (_req, res) => res.json({ status: "ok", ts: Date.now() }));
 
-  // Vite dev server handles static in development
-  if (process.env.NODE_ENV === "production") {
+  return app;
+}
+
+/** Full app with static files for self-hosted / local */
+export function createServer() {
+  const app = createApiApp();
+  if (process.env.NODE_ENV === "production" && !process.env.NETLIFY) {
     const distPath = path.join(__dirname, "../dist/client");
     app.use(express.static(distPath));
     app.get("*", (_req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
     });
   }
-
   return app;
 }
 
-const app = createServer();
-const PORT = process.env.PORT || 3001;
-
-app.listen(PORT, () => {
-  console.log(`🚀 Home Queen API running on http://localhost:${PORT}`);
-});
+// Only listen when run directly (not as Netlify function)
+if (!process.env.NETLIFY) {
+  const app = createServer();
+  const PORT = process.env.PORT || 3001;
+  app.listen(PORT, () => {
+    console.log(`🚀 Home Queen API running on http://localhost:${PORT}`);
+  });
+}

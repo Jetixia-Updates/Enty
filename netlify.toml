@@ -1,8 +1,19 @@
 [build]
-  command = "pnpm build"
+  command = "pnpm prisma generate && pnpm build"
   publish = "dist"
 
-# SPA routing - all routes serve index.html
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["@prisma/client"]
+
+# API requests → serverless function (must be before SPA rule)
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/server/:splat"
+  status = 200
+  force = true
+
+# SPA routing - all other routes serve index.html
 [[redirects]]
   from = "/*"
   to = "/index.html"
