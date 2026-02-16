@@ -4,10 +4,12 @@
 
 [build.environment]
   NODE_VERSION = "18"
+  PNPM_FLAGS = "--shamefully-hoist"
 
 [functions]
   node_bundler = "esbuild"
-  external_node_modules = ["@prisma/client"]
+  included_files = ["generated/**"]
+  external_node_modules = ["prisma-generated"]
 
 # API requests → serverless function (must be before SPA rule)
 [[redirects]]
