@@ -4,7 +4,7 @@
   "description": "Smart Family & Home Services Platform",
   "type": "module",
   "scripts": {
-    "postinstall": "prisma generate && (ln -sf ../generated/prisma node_modules/prisma-generated 2>/dev/null || true)",
+    "postinstall": "prisma generate && (rm -rf node_modules/prisma-generated 2>/dev/null; cp -r generated/prisma node_modules/prisma-generated)",
     "dev": "concurrently \"vite\" \"tsx watch server/index.ts\"",
     "build": "vite build",
     "start": "NODE_ENV=production tsx server/index.ts",
