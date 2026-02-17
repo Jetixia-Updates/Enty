@@ -15,6 +15,7 @@ import { expensesRoutes } from "./routes/expenses.js";
 import { shoppingRoutes } from "./routes/shopping.js";
 import { notificationsRoutes } from "./routes/notifications.js";
 import { kidsRoutes } from "./routes/kids.js";
+import { envCheckMiddleware } from "./middleware/env-check.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -23,6 +24,12 @@ export function createApiApp() {
   const app = express();
   app.use(cors({ origin: true, credentials: true }));
   app.use(express.json());
+
+  // Env check for /api routes (except ping) - fail fast with clear message
+  app.use("/api", (req, res, next) => {
+    if (req.path === "/ping") return next();
+    return envCheckMiddleware(req, res, next);
+  });
 
   // Netlify: basePath strips /.netlify/functions/server, so path is /auth/register → /api/auth/register
   app.use((req, _res, next) => {
@@ -47,12 +54,18 @@ export function createApiApp() {
   app.get("/api/ping", (_req, res) => res.json({ status: "ok", ts: Date.now() }));
   app.get("/api/health", async (_req, res) => {
     try {
+      if (!process.env.DATABASE_URL) {
+        return res.status(503).json({ ok: false, db: "error", error: "DATABASE_URL not set in Netlify env" });
+      }
       const { prisma } = await import("./lib/prisma.js");
       await prisma.$queryRaw`SELECT 1`;
       res.json({ ok: true, db: "connected" });
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      res.status(500).json({ ok: false, db: "error", error: msg });
+      const hint = msg.includes("HOST") || msg.includes("reach")
+        ? "Check DATABASE_URL in Netlify: use your real Neon connection string from console.neon.tech"
+        : undefined;
+      res.status(500).json({ ok: false, db: "error", error: msg, hint });
     }
   });
 

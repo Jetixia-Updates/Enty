@@ -58,9 +58,9 @@ authRoutes.post("/register", async (req, res) => {
     const msg = e instanceof Error ? e.message : String(e);
     const hint =
       !process.env.DATABASE_URL
-        ? "DATABASE_URL not set in Netlify env"
-        : msg.includes("connect") || msg.includes("ECONNREFUSED")
-          ? "Database unreachable - check DATABASE_URL"
+        ? "DATABASE_URL not set. Add it in Netlify: Site Settings > Environment Variables"
+        : msg.includes("HOST") || msg.includes("reach") || msg.includes("connect") || msg.includes("ECONNREFUSED")
+          ? "DATABASE_URL invalid. Use your real Neon URL from console.neon.tech (replace HOST with ep-xxx.aws.neon.tech)"
           : msg.includes("JWT") || msg.includes("secret")
             ? "JWT_SECRET not set in Netlify env"
             : msg.includes("prisma") || msg.includes("Cannot find module")
@@ -102,9 +102,9 @@ authRoutes.post("/login", async (req, res) => {
     const msg = e instanceof Error ? e.message : String(e);
     const hint =
       !process.env.DATABASE_URL
-        ? "DATABASE_URL not set in Netlify env"
-        : msg.includes("connect") || msg.includes("ECONNREFUSED")
-          ? "Database unreachable - check DATABASE_URL"
+        ? "DATABASE_URL not set. Add it in Netlify: Site Settings > Environment Variables"
+        : msg.includes("HOST") || msg.includes("reach") || msg.includes("connect") || msg.includes("ECONNREFUSED")
+          ? "DATABASE_URL invalid. Use your real Neon URL from console.neon.tech (replace HOST with ep-xxx.aws.neon.tech)"
           : msg.includes("JWT") || msg.includes("secret")
             ? "JWT_SECRET not set in Netlify env"
             : msg.includes("prisma") || msg.includes("Cannot find module")
