@@ -31,7 +31,7 @@ export default function Signup() {
         body: JSON.stringify({ name, email, password, role: "WIFE" }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.hint ? `${data.error}: ${data.hint}` : (data.error || "Registration failed"));
+      if (!res.ok) throw new Error(data.hint ? `${data.error}: ${data.hint}` : data.detail ? `${data.error}: ${data.detail}` : (data.error || "Registration failed"));
       setAuth(data.user, data.token);
       navigate("/dashboard");
     } catch (err) {

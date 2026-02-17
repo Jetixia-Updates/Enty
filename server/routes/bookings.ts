@@ -30,6 +30,7 @@ bookingsRoutes.post("/", async (req: AuthRequest, res) => {
     const data = bookingSchema.parse(req.body);
     const provider = await prisma.provider.findFirst({
       where: { id: data.providerId, isApproved: true, isAvailable: true },
+      include: { service: true },
     });
     if (!provider) return res.status(400).json({ error: "Provider not available" });
 

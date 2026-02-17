@@ -16,8 +16,9 @@ notificationsRoutes.get("/", async (req: AuthRequest, res) => {
 });
 
 notificationsRoutes.patch("/:id/read", async (req: AuthRequest, res) => {
+  const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   await prisma.notification.updateMany({
-    where: { id: req.params.id, userId: req.userId! },
+    where: { id, userId: req.userId! },
     data: { isRead: true },
   });
   res.json({ ok: true });

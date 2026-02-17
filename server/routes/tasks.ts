@@ -42,8 +42,9 @@ tasksRoutes.post("/", async (req: AuthRequest, res) => {
 });
 
 tasksRoutes.patch("/:id", async (req: AuthRequest, res) => {
+  const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const task = await prisma.task.findFirst({
-    where: { id: req.params.id, userId: req.userId! },
+    where: { id, userId: req.userId! },
   });
   if (!task) return res.status(404).json({ error: "Task not found" });
 
@@ -63,8 +64,9 @@ tasksRoutes.patch("/:id", async (req: AuthRequest, res) => {
 });
 
 tasksRoutes.delete("/:id", async (req: AuthRequest, res) => {
+  const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const task = await prisma.task.findFirst({
-    where: { id: req.params.id, userId: req.userId! },
+    where: { id, userId: req.userId! },
   });
   if (!task) return res.status(404).json({ error: "Task not found" });
   await prisma.task.delete({ where: { id: task.id } });

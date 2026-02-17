@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { prisma } from "../lib/prisma.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "home-queen-dev-secret-change-in-production";
 
@@ -20,14 +19,14 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
   try {
     const payload = jwt.verify(token, JWT_SECRET) as { userId: string; role: string };
     req.userId = payload.userId;
-    req.user = payload;
+    req.user = { id: payload.userId, role: payload.role };
     next();
   } catch {
     return res.status(401).json({ error: "Invalid or expired token" });
   }
 }
 
-export function optionalAuth(req: AuthRequest, res: Response, next: NextFunction) {
+export function optionalAuth(req: AuthRequest, _res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
   const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
 
@@ -38,7 +37,7 @@ export function optionalAuth(req: AuthRequest, res: Response, next: NextFunction
   try {
     const payload = jwt.verify(token, JWT_SECRET) as { userId: string; role: string };
     req.userId = payload.userId;
-    req.user = payload;
+    req.user = { id: payload.userId, role: payload.role };
   } catch {
     // Ignore invalid tokens
   }

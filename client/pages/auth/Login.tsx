@@ -31,7 +31,7 @@ export default function Login() {
       });
       const data = await res.json();
       if (!res.ok) {
-        const msg = data.hint ? `${data.error}: ${data.hint}` : data.debug ? `${data.error}: ${data.debug}` : (data.error || "Login failed");
+        const msg = data.hint ? `${data.error}: ${data.hint}` : data.detail ? `${data.error}: ${data.detail}` : (data.error || "Login failed");
         throw new Error(msg);
       }
       setAuth(data.user, data.token);

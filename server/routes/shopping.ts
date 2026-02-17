@@ -33,8 +33,9 @@ shoppingRoutes.post("/lists", async (req: AuthRequest, res) => {
 });
 
 shoppingRoutes.get("/lists/:id", async (req: AuthRequest, res) => {
+  const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const list = await prisma.shoppingList.findFirst({
-    where: { id: req.params.id, userId: req.userId! },
+    where: { id, userId: req.userId! },
     include: { items: true },
   });
   if (!list) return res.status(404).json({ error: "List not found" });
@@ -43,9 +44,10 @@ shoppingRoutes.get("/lists/:id", async (req: AuthRequest, res) => {
 
 shoppingRoutes.post("/lists/:id/items", async (req: AuthRequest, res) => {
   try {
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
     const data = itemSchema.parse(req.body);
     const list = await prisma.shoppingList.findFirst({
-      where: { id: req.params.id, userId: req.userId! },
+      where: { id, userId: req.userId! },
     });
     if (!list) return res.status(404).json({ error: "List not found" });
     const item = await prisma.shoppingItem.create({
@@ -65,9 +67,10 @@ shoppingRoutes.post("/lists/:id/items", async (req: AuthRequest, res) => {
 });
 
 shoppingRoutes.patch("/items/:id", async (req: AuthRequest, res) => {
+  const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const item = await prisma.shoppingItem.findFirst({
     where: {
-      id: req.params.id,
+      id,
       shoppingList: { userId: req.userId! },
     },
   });
@@ -85,9 +88,10 @@ shoppingRoutes.patch("/items/:id", async (req: AuthRequest, res) => {
 });
 
 shoppingRoutes.delete("/items/:id", async (req: AuthRequest, res) => {
+  const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const item = await prisma.shoppingItem.findFirst({
     where: {
-      id: req.params.id,
+      id,
       shoppingList: { userId: req.userId! },
     },
   });
