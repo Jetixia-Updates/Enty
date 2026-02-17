@@ -16,10 +16,8 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["client/*"],
-      "@shared/*": ["shared/*"]
-    }
+    "paths": { "@/*": ["client/*"], "@shared/*": ["shared/*"] },
+    "preserveSymlinks": false
   },
   "include": ["client", "server", "shared", "prisma", "vite.config.ts", "client/vite-env.d.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
