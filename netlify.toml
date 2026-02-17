@@ -1,15 +1,14 @@
 [build]
-  command = "pnpm prisma generate && pnpm build"
+  command = "prisma generate && npm run build"
   publish = "dist"
 
 [build.environment]
   NODE_VERSION = "18"
-  PNPM_FLAGS = "--shamefully-hoist"
 
 [functions]
   node_bundler = "esbuild"
-  included_files = ["generated/**"]
-  external_node_modules = ["prisma-generated"]
+  external_node_modules = ["@prisma/client"]
+  included_files = ["node_modules/.prisma/**", "node_modules/@prisma/client/**"]
 
 # API requests → serverless function (must be before SPA rule)
 [[redirects]]
