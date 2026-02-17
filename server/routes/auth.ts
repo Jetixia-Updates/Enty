@@ -63,8 +63,10 @@ authRoutes.post("/register", async (req, res) => {
           ? "Database unreachable - check DATABASE_URL"
           : msg.includes("JWT") || msg.includes("secret")
             ? "JWT_SECRET not set in Netlify env"
-            : undefined;
-    res.status(500).json({ error: "Registration failed", hint });
+            : msg.includes("prisma") || msg.includes("Cannot find module")
+              ? "Prisma client load failed - check Netlify deploy logs"
+              : undefined;
+    res.status(500).json({ error: "Registration failed", hint, detail: msg });
   }
 });
 
@@ -105,7 +107,9 @@ authRoutes.post("/login", async (req, res) => {
           ? "Database unreachable - check DATABASE_URL"
           : msg.includes("JWT") || msg.includes("secret")
             ? "JWT_SECRET not set in Netlify env"
-            : undefined;
-    res.status(500).json({ error: "Login failed", hint });
+            : msg.includes("prisma") || msg.includes("Cannot find module")
+              ? "Prisma client load failed - check Netlify deploy logs"
+              : undefined;
+    res.status(500).json({ error: "Login failed", hint, detail: msg });
   }
 });
